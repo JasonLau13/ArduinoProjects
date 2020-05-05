@@ -124,6 +124,7 @@ void loop() {
     servo.write(angle);           
     delay(5);       
   }
+  isKey = 1;
                   
    
 
