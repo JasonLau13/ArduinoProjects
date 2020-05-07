@@ -1,0 +1,109 @@
+
+#include <Servo.h>. 
+#include <LiquidCrystal.h> 
+
+LiquidCrystal lcd(7, 6, 11, 10, 9, 8);  // (RS,E,D4,D5,D6,D7)  Operates in 4 bit mode
+
+int buzzer =13;
+int trigPin = 3;
+int echoPin = 4 ;
+long duration;
+int distance;
+Servo myServo;
+ 
+void setup() {
+  lcd.begin(16,2);
+  pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
+  pinMode(echoPin, INPUT); // Sets the echoPin as an Input
+  Serial.begin(9600);
+  myServo.attach(2); // Defines on which pin is the servo motor attached
+}
+
+void loop() {
+  
+  for(int i=15;i<=165;i++){  //Rotate servo for 165 degrees
+  myServo.write(i);
+  delay(10);
+  distance = findDistance();  //distance read from sonar
+  
+  Serial.print(i);
+  Serial.print(",");
+  Serial.print(distance);
+  Serial.print(".");
+  
+  lcd.setCursor(0,0);  
+  lcd.print("Angle:");
+  lcd.print(i);
+  lcd.setCursor(0,2);
+  lcd.print("Distance:");
+  
+    if(distance <= 40){
+      if(distance<10){
+        lcd.print(" ");
+        if(distance < 5){
+          tone(buzzer, 450);
+          delay(500);
+          noTone(buzzer);
+          delay(500);
+          } 
+        }
+    lcd.print(distance);
+    }
+    else{
+    lcd.print("--"); 
+    }
+  }
+  
+  lcd.clear();
+
+  for(int i=165;i>15;i--){  
+    myServo.write(i);
+    delay(10);
+    distance = findDistance();
+    lcd.setCursor(0,0);
+    lcd.print("Angle:");
+    if(i < 100){
+      lcd.print(" ");
+    }
+    lcd.print(i);
+    lcd.setCursor(0,2);
+    lcd.print("Distance:");
+    if(distance <= 40){
+      if(distance<10){
+        lcd.print(" ");
+        if(distance < 5){
+          tone(buzzer, 450);
+          delay(500);
+          noTone(buzzer);
+          delay(500);
+         }
+      }
+    lcd.print(distance);
+    }
+    else{
+      lcd.print("--"); 
+    }
+  }
+    lcd.clear();
+}
+
+int findDistance(){ 
+  
+  digitalWrite(trigPin, LOW); 
+  delay(2);
+  digitalWrite(trigPin, HIGH); 
+  delay(10); 
+  digitalWrite(trigPin, LOW);
+  duration = pulseIn(echoPin, HIGH); // Reads the echoPin, returns the sound wave travel time in microseconds 
+  distance= duration/58.82;          //find the distance travelled based on time  : time * 0.034/2 (round trip time)
+  return distance;
+}
+
+void clearLCDLine(int line)
+{               
+        lcd.setCursor(0,line);
+        for(int n = 0; n < 20; n++) 
+        {
+                lcd.print(" ");
+        }
+}
